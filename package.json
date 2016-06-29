@@ -1,0 +1,17 @@
+{
+  "name": "thorin-discovery",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node discovery.js"
+  },
+  "dependencies": {
+    "thorin": "^1.x",
+    "thorin-store-redis": "^1.x",
+    "thorin-transport-http": "^1.x",
+    "thorin-plugin-docs": "^1.x"
+  },
+  "engines": {
+    "node": ">= 4.x"
+  }
+}
