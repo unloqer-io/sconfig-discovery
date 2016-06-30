@@ -6,7 +6,7 @@ const thorin = require('thorin');
 
 thorin
   .addConfig('sconfig', {
-    version: 'discovery'
+    version: 'master'
   })
   .addTransport(require('thorin-transport-http'))
   .addStore(require('thorin-store-redis'), 'redis');
