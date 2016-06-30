@@ -38,6 +38,18 @@
 
 
 
+## home
+
+##### Aliases 
+> - GET /
+
+
+## ping
+
+##### Aliases 
+> - GET /ping
+
+
 ## registry.announce
 
 ##### Aliases 
