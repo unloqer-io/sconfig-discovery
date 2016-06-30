@@ -6,4 +6,5 @@ Thumbs.db
 *.gz
 node_modules
 .thorin
-app/launch.json
+launch.json
+config/deploy.sh

@@ -11,13 +11,16 @@ thorin
   .addTransport(require('thorin-transport-http'))
   .addStore(require('thorin-store-redis'), 'redis');
 
-if(thorin.env === 'development') {
+if (thorin.env === 'production') {
+  thorin.addPlugin(require('thorin-plugin-loglet'));
+}
+if (thorin.env === 'development') {
   thorin.addPlugin(require('thorin-plugin-docs'));
 }
 thorin.loadPath('app/lib/');
 
 thorin.run((err) => {
-  if(err) {
+  if (err) {
     setTimeout(() => {
       process.exit(1);
     }, 100);
