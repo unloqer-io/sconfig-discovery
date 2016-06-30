@@ -4,6 +4,7 @@ const dispatcher = thorin.dispatcher;
 dispatcher
   .addAction('home')
   .alias('GET', '/')
+  .debug(false)
   .use((intentObj) => {
     intentObj.result({
       version: thorin.version
@@ -13,6 +14,7 @@ dispatcher
 dispatcher
   .addAction('ping')
   .alias('GET', '/ping')
+  .debug(false)
   .use((intentObj) => {
     intentObj.result({
       pong: true

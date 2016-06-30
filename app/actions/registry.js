@@ -10,6 +10,7 @@ const dispatcher = thorin.dispatcher;
 dispatcher
   .addAction('registry.get')
   .template('registry')
+  .debug(false)
   .input({
     type: dispatcher.validate('STRING').default(null),
     tags: dispatcher.validate('ARRAY', {type: 'string'}).default(null)
@@ -60,6 +61,7 @@ dispatcher
   .addAction('registry.announce')
   .template('registry')
   .alias('POST', '/announce')
+  .debug(false)
   .input({
     type: dispatcher.validate('STRING').error('TYPE.MISSING', 'Missing microservice type', 400),
     name: dispatcher.validate('STRING').default(null),  // the microservice name.
