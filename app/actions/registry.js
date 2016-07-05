@@ -66,6 +66,7 @@ dispatcher
     type: dispatcher.validate('STRING').error('TYPE.MISSING', 'Missing microservice type', 400),
     name: dispatcher.validate('STRING').default(null),  // the microservice name.
     ip: dispatcher.validate('IP').error('IP.MISSING', 'Missing microservice IP address', 400),
+    proto: dispatcher.validate('ENUM', ['http', 'https']).default('http'),
     port: dispatcher.validate('NUMBER', {
       float: false,
       min: 1,
