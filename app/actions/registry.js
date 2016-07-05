@@ -55,7 +55,7 @@ dispatcher
 
 /*
  * Registers a new service to the registry.
- * Note that services are unique by their ip:port.
+ * Note that services are unique by their host:port.
  * */
 dispatcher
   .addAction('registry.announce')
@@ -65,25 +65,26 @@ dispatcher
   .input({
     type: dispatcher.validate('STRING').error('TYPE.MISSING', 'Missing microservice type', 400),
     name: dispatcher.validate('STRING').default(null),  // the microservice name.
-    ip: dispatcher.validate('IP').error('IP.MISSING', 'Missing microservice IP address', 400),
+    host: dispatcher.validate('STRING').error('HOST.MISSING', 'Missing microservice host address', 400),
     proto: dispatcher.validate('ENUM', ['http', 'https']).default('http'),
     port: dispatcher.validate('NUMBER', {
       float: false,
       min: 1,
       max: 65536
     }).error('PORT.MISSING', 'Missing microservice port', 400),
+    path: dispatcher.validate('STRING').default(''), // the default host path
     tags: dispatcher.validate('ARRAY', {type: 'string'}).default([]),
     ttl: dispatcher.validate('NUMBER', {min: 1, max: 120}).default(30)  // default TTL of the service before we remove it, in seconds
   })
   .use((intentObj, next) => {
     const serviceData = intentObj.input(),
       accessToken = intentObj.data('token'),
-      serviceId = serviceData.ip + ':' + serviceData.port,
+      serviceId = serviceData.host + ':' + serviceData.port,
       registryData = intentObj.data('registry'),
       storeObj = thorin.lib('store');
     serviceData.env = intentObj.data('registry_env');
     let wasFound = false, sid;
-    // Step one, check if the registry already contains the new service ip:port
+    // Step one, check if the registry already contains the new service host:port
     for (let i = 0, len = registryData.length; i < len; i++) {
       let item = registryData[i];
       if (item.id === serviceId && item.env === intentObj.data('registry_env')) {
@@ -102,7 +103,7 @@ dispatcher
     // If we did not find it, we push it.
     if (!wasFound) {
       serviceData.remove_at = Date.now() + serviceData.ttl * 1000;
-      serviceData.id = serviceId; // this is the ip:port id
+      serviceData.id = serviceId; // this is the host:port id
       serviceData.sid = thorin.util.sha1(thorin.util.randomString(32) + serviceData.id); // this is the heartbeat id
       sid = serviceData.sid;
       registryData.push(serviceData);
