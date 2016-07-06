@@ -58,8 +58,10 @@
 ##### Input 
  - **type** *(required)*  `string`
  - **name**  `string`
- - **ip** *(required)*  `ip`
+ - **host** *(required)*  `string`
+ - **proto**  `enum(http, https), default http`
  - **port** *(required)*  `number`
+ - **path**  `string`
  - **tags**  `array, default `
  - **ttl**  `number, default 30`
 
