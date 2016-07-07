@@ -11,7 +11,7 @@ let reqCount = 0;
 setInterval(() => {
   if(reqCount === 0) return;
   let reqPerSec = parseFloat(reqCount / 3600).toFixed(2);
-  log.info(`Registry requests per hour: ${reqCount},  ${reqPerSec}/sec`);
+  log.info(`Registry requests per hour: ${reqCount} [${reqPerSec}/sec]`);
   reqCount = 0;
 }, 60 * 60 * 1000); // once an hour, we reset the request count.
 dispatcher
