@@ -9,11 +9,13 @@ const dispatcher = thorin.dispatcher;
  * */
 let reqCount = 0;
 setInterval(() => {
-  if(reqCount === 0) return;
+  if (reqCount === 0) return;
   let reqPerSec = parseFloat(reqCount / 3600).toFixed(2);
   log.info(`Registry requests per hour: ${reqCount} [${reqPerSec}/sec]`);
   reqCount = 0;
 }, 60 * 60 * 1000); // once an hour, we reset the request count.
+
+
 dispatcher
   .addAction('registry.get')
   .template('registry')
@@ -26,6 +28,8 @@ dispatcher
   .use('registry.saveChanges')
   .use((intentObj, next) => {
     const registry = intentObj.data('registry'),
+      storeObj = thorin.lib('store'),
+      accessToken = intentObj.data('token'),
       resultData = [],
       regEnv = intentObj.data('registry_env'),
       filterType = intentObj.input('type'),
@@ -55,10 +59,21 @@ dispatcher
       delete item.env;
       resultData.push(item);
     }
-    intentObj
-      .result(resultData)
-      .send();
-    reqCount++;
+    let calls = [];
+
+    calls.push(() => {
+      return storeObj.getServiceKey(accessToken).then((serviceKey) => {
+        intentObj.setMeta({
+          service_key: serviceKey
+        });
+      });
+    });
+    thorin.series(calls, (e) => {
+      if(e) return next(e);
+      intentObj.result(resultData);
+      intentObj.send();
+      reqCount++;
+    });
   });
 
 /*
