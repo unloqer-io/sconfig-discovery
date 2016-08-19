@@ -69,7 +69,7 @@ dispatcher
       });
     });
     thorin.series(calls, (e) => {
-      if(e) return next(e);
+      if (e) return next(e);
       intentObj.result(resultData);
       intentObj.send();
       reqCount++;
@@ -90,6 +90,7 @@ dispatcher
     name: dispatcher.validate('STRING').default(null),  // the microservice name.
     host: dispatcher.validate('STRING').error('HOST.MISSING', 'Missing microservice host address', 400),
     proto: dispatcher.validate('ENUM', ['http', 'https']).default('http'),
+    timeout: dispatcher.validate('NUMBER', {min: 100}).default(null),
     port: dispatcher.validate('NUMBER', {
       float: false,
       min: 1,
@@ -106,6 +107,7 @@ dispatcher
       registryData = intentObj.data('registry'),
       storeObj = thorin.lib('store');
     serviceData.env = intentObj.data('registry_env');
+    if (serviceData.timeout == null) delete serviceData.timeout;
     let wasFound = false, sid;
     // Step one, check if the registry already contains the new service host:port
     for (let i = 0, len = registryData.length; i < len; i++) {
