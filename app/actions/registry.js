@@ -89,7 +89,7 @@ dispatcher
     type: dispatcher.validate('STRING').error('TYPE.MISSING', 'Missing microservice type', 400),
     name: dispatcher.validate('STRING').default(null),  // the microservice name.
     host: dispatcher.validate('STRING').error('HOST.MISSING', 'Missing microservice host address', 400),
-    proto: dispatcher.validate('ENUM', ['http', 'https']).default('http'),
+    proto: dispatcher.validate('ENUM', ['http', 'https', 'ws', 'wss', 'tcp']).default('http'),
     timeout: dispatcher.validate('NUMBER', {min: 100}).default(null),
     port: dispatcher.validate('NUMBER', {
       float: false,
