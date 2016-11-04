@@ -6,6 +6,7 @@
     "start": "node launch.js"
   },
   "dependencies": {
+    "dot-object": "^1.5.4",
     "prompt": "^1.0.0",
     "thorin": "^1.x",
     "thorin-plugin-docs": "^1.x",

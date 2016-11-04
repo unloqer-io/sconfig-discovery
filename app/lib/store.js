@@ -2,12 +2,20 @@
 const redisObj = thorin.store('redis'),
   logger = thorin.logger('store'),
   DEFAULT_TOKEN_ENVIRONMENT = 'development';
+const MAX_CONFIG_SIZE = thorin.config('config.maxSize');
 
 function getKey(key) {
   return getPrefix() + '.' + key;
 }
 function getPrefix() {
   return thorin.config('store.redis.prefix');
+}
+
+function getConfigKey(token) {
+  let hash = thorin.util.sha2(token),
+    tmp = hash.substr(0, 32) + token;
+  token = thorin.util.sha2(tmp);
+  return getKey('config.' + token);
 }
 
 function getTokenEnv(token) {
@@ -300,6 +308,60 @@ class RegistryStore {
       });
     });
   }
+
+  /*
+   * Sets/gets encrypted config
+   * */
+  setConfig(token, data) {
+    let calls = [],
+      secretToken = token.substr(0, 32);
+    /* Check the config data, it must be under 10,000 chars */
+    let rawData;
+    try {
+      rawData = JSON.stringify(data);
+      if (rawData.length > MAX_CONFIG_SIZE) {
+        return Promise.reject(thorin.error('INVALID.DATA', 'Config data is too large'));
+      }
+      rawData = thorin.util.encrypt(rawData, secretToken);
+      if (!rawData) throw new Error('Config data could not be encrypted');
+    } catch (e) {
+      logger.warn(`Received invalid config payload`);
+      logger.debug(data);
+      return Promise.reject(thorin.error('INVALID.DATA', 'Config data is not valid'));
+    }
+    calls.push(() => {
+      return redisObj.exec('SET', getConfigKey(token), rawData);
+    });
+
+    return thorin.series(calls);
+  }
+
+  getConfig(token) {
+    let calls = [],
+      result = {},
+      secretToken = token.substr(0, 32);
+
+    calls.push(() => {
+      return redisObj.exec('GET', getConfigKey(token)).then((r) => {
+        if (!r) return;
+        try {
+          r = thorin.util.decrypt(r, secretToken);
+        } catch (e) {
+          return;
+        }
+        try {
+          r = JSON.parse(r);
+        } catch (e) {
+          return;
+        }
+        result = r;
+      });
+    });
+    return thorin.series(calls).then(() => {
+      return result;
+    });
+  }
 }
+
 
 thorin.addLibrary(RegistryStore, 'store');

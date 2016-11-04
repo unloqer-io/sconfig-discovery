@@ -21,10 +21,11 @@ thorin.run((err) => {
   }
   const data = `
 -----------------Thorin.io discovery service-----------------
-- Service listening on port ${thorin.config('transport.http.port')}                           -
-- In order to create a new discovery namespace, you have to -
-- exec:                                                     -
--  docker exec -it $DOCKER_ID node create.js                -
+| Service listening on port ${thorin.config('transport.http.port')}                           |
+| In order to create a new discovery namespace, run:        |
+|    docker exec -it $DOCKER_ID node create                 |
+| In order to modify encrypted configuration, run:          |
+|    docker exec -it $DOCKER_ID node config                 |
 -------------------------------------------------------------
 `;
   console.log(data);
