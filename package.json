@@ -1,16 +1,17 @@
 {
   "name": "thorin-discovery",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
-    "start": "node discovery.js"
+    "start": "node launch.js"
   },
   "dependencies": {
+    "prompt": "^1.0.0",
     "thorin": "^1.x",
-    "thorin-store-redis": "^1.x",
-    "thorin-transport-http": "^1.x",
     "thorin-plugin-docs": "^1.x",
-    "thorin-plugin-loglet": "^1.x"
+    "thorin-plugin-loglet": "^1.x",
+    "thorin-store-redis": "^1.x",
+    "thorin-transport-http": "^1.x"
   },
   "engines": {
     "node": ">= 4.x"

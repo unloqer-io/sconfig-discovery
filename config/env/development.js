@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  "admin.token": "YOUR_ADMIN_TOKEN_HERE",
+  "admin.token": process.env.ADMIN_TOKEN,
   "store.redis": {
     host: "localhost"
   }

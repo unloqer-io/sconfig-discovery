@@ -1,40 +1,4 @@
 
-## admin.namespace.create
-##### Aliases 
-> - POST /admin/namespace
-
-##### Input 
- - **name** *(required)*  `Alpha`
-
-##### Authorization 
- - admin.token
-
-
-
-## admin.namespace.delete
-##### Aliases 
-> - DELETE /admin/namespace
-
-##### Input 
- - **name** *(required)*  `Alpha`
-
-##### Authorization 
- - admin.token
-
-
-
-## admin.service_key.reset
-##### Aliases 
-> - POST /admin/service-key/reset
-
-##### Input 
- - **token** *(required)*  `String`
-
-##### Authorization 
- - admin.token
-
-
-
 ## config.get
 ##### Aliases 
 > - GET /config

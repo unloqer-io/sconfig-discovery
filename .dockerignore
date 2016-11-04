@@ -1,0 +1,10 @@
+node_modules
+docs
+sessions
+config/.thorin
+config/*.sh
+*.log
+.gitlab-ci.yml
+README.md
+.editorconfig
+sql/

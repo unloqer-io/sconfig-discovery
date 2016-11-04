@@ -22,7 +22,7 @@ function getTokenEnv(token) {
     env = token.substr(0, idx);
     t = token.substr(idx + 1);
   }
-  if(env.length > 12) {
+  if (env.length > 12) {
     env = env.substr(0, 12);
   }
   return {
@@ -39,15 +39,56 @@ function getTokenEnv(token) {
 
 class RegistryStore {
 
-  createNamespace(data) {
+  bootNamespace(token) {
+    let calls = [],
+      nsKey = getKey('boot.ns'),
+      isAdded = false,
+      nsHash = thorin.util.sha2(token);
+    if (token.length < 48) {
+      return Promise.reject(thorin.error('TOKEN.LENGTH', 'The discovery token must have at least 48 chars'));
+    }
+    /* check if boot namespace token already exists */
+    calls.push((stop) => {
+      return redisObj.exec('GET', nsKey).then((r) => {
+        if (r && r === nsHash) return stop();
+      });
+    });
+
+    /* create a default namespace. */
+    calls.push(() => {
+      return this.createNamespace({
+        name: 'main-store'
+      }, token).then(() => {
+        isAdded = true;
+      });
+    });
+
+    /* save the ns */
+    calls.push(() => {
+      return redisObj.exec('SET', nsKey, nsHash);
+    });
+
+    return thorin.series(calls).then(() => {
+      return isAdded;
+    });
+  }
+
+  createNamespace(data, _fullKey) {
     return new Promise((resolve, reject) => {
       let secretKey = thorin.util.randomString(32),
         publicKey = thorin.util.randomString(16),
         fullKey = secretKey + publicKey,
         hashKey = thorin.util.sha2(fullKey),
         calls = [];
+      if (_fullKey) { //override the random keys
+        secretKey = _fullKey.substr(0, 32);
+        fullKey = _fullKey;
+        hashKey = thorin.util.sha2(fullKey);
+      }
+
       // Check if ns exists
       calls.push((stop) => {
+        if (_fullKey) return;
         return redisObj.exec('HGET', getKey('namespace'), data.name).then((r) => {
           if (r) return stop(thorin.error('NAMESPACE.EXISTS', 'A namespace with that name already exists.'));
         });
@@ -78,7 +119,7 @@ class RegistryStore {
 
       thorin.series(calls, (e) => {
         if (e) {
-          if(e.ns !== 'NAMESPACE') {
+          if (e.ns !== 'NAMESPACE') {
             logger.warn(`Failed to create namespace ${data.name}`, e);
           }
           return reject(e);
@@ -136,8 +177,8 @@ class RegistryStore {
   }
 
   /*
-  * Resets the service key of a namespace.
-  * */
+   * Resets the service key of a namespace.
+   * */
   resetServiceKey(token) {
     return new Promise((resolve, reject) => {
       const calls = [],
@@ -146,7 +187,7 @@ class RegistryStore {
       // step one, fetch the key hash of the namespace.
       calls.push((stop) => {
         return redisObj.exec('HGET', getKey('service_key'), hashKey).then((r) => {
-          if(!r) return stop(thorin.error('TOKEN.NOT_FOUND', 'Token not found or invalid.', 404));
+          if (!r) return stop(thorin.error('TOKEN.NOT_FOUND', 'Token not found or invalid.', 404));
         });
       });
 
@@ -159,7 +200,7 @@ class RegistryStore {
       });
 
       thorin.series(calls, (e) => {
-        if(e) return reject(e);
+        if (e) return reject(e);
         resolve();
       });
     });
