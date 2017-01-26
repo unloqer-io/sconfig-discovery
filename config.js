@@ -24,7 +24,7 @@ function doClear(token, keyName) {
   });
 
   calls.push(() => {
-    if(!keyName) {
+    if (!keyName) {
       result = {};
     } else {
       dot.del(keyName, result);
@@ -67,21 +67,41 @@ function doSet(token, keyName, keyValue) {
   let store = thorin.lib('store');
   let calls = [],
     config = {};
+  let nr = /^\d+$/;
   if (keyValue === 'true') {
     keyValue = true;
   } else if (keyValue === 'false') {
     keyValue = false;
   } else {
     // check number only
-    let nr = /^\d+$/;
     if (nr.test(keyValue)) {
       keyValue = parseInt(keyValue);
+    } else if (keyValue.indexOf('[') !== -1 || keyValue.indexOf('{') !== -1) {
+      try {
+        keyValue = JSON.parse(keyValue);
+      } catch (e) {
+        console.error('Invalid JSON for key value: ', keyValue);
+        return process.exit(1);
+      }
+    } else if (keyValue.indexOf(',') !== -1) {
+      keyValue = keyValue.split(',');
+      for (let i = 0; i < keyValue.length; i++) {
+        keyValue[i] = keyValue[i].trim();
+        if (nr.test(keyValue[i])) {
+          keyValue[i] = parseInt(keyValue[i]);
+        } else if (keyValue[i] === 'true') {
+          keyValue[i] = true;
+        } else if (keyValue[i] === 'false') {
+          keyValue[i] = false;
+        }
+      }
     }
   }
   calls.push(() => {
     return store.getConfig(token).then((r) => config = r);
   });
   calls.push(() => {
+    dot.del(keyName, config);
     dot.str(keyName, keyValue, config);
     return store.setConfig(token, config);
   });
@@ -90,7 +110,7 @@ function doSet(token, keyName, keyValue) {
       console.error(`Error: ${e.message}`);
       return process.exit(1);
     }
-    console.log(`Set: ` + keyName + ' => ' + keyValue);
+    console.log(`Set: ` + keyName + ' => ' + JSON.stringify(keyValue));
     process.exit(0);
   });
 }
@@ -106,8 +126,8 @@ thorin.run((err) => {
   let args = process.argv.splice(2),
     cmd = args[0];
   args = args.splice(1);
-  if (cmd !== 'get' && cmd !== 'set' && cmd !== 'clear') {
-    console.error(`Usage: node config {set|get|clear} {key} {value}`);
+  if (cmd !== 'get' && cmd !== 'set' && cmd !== 'clear' && cmd !== 'del') {
+    console.error(`Usage: node config {set|get|clear|del} {key} {value}`);
     return process.exit(1);
   }
   let keyName = args[0],
@@ -118,7 +138,7 @@ thorin.run((err) => {
     return process.exit(1);
   }
   /* CLEAR config (key) */
-  if (cmd === 'clear') {
+  if (cmd === 'clear' || cmd === 'del') {
     return doClear(token, keyName);
   }
 
@@ -139,16 +159,16 @@ thorin.run((err) => {
     return process.exit(1);
   }
   args = args.splice(1);  // remove the keyName
-  if(typeof keyValue === 'undefined') {
+  if (typeof keyValue === 'undefined') {
     return prompt.get({
       name: 'value',
       description: 'Value'
     }, (e, data) => {
-      if(!data.value) {
+      if (!data.value) {
         console.log(`Abort`);
         return process.exit(0);
       }
-      if(e) {
+      if (e) {
         console.log(`\nTerminating`);
         return process.exit(0);
       }
