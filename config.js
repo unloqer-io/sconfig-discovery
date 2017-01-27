@@ -14,6 +14,57 @@ thorin
   .addStore(require('thorin-store-redis'), 'redis')
   .loadPath('app/lib/');
 
+function doInput(token) {
+  console.log(`Copy your JSON configuration here. Type "exit" to exit`);
+  process.stdin.setEncoding('utf8');
+  let fullData = "";
+  process.stdin.on('data', (d) => {
+    fullData += d;
+    if (d.toString().trim() === 'exit') {
+      console.log('Exiting...');
+      process.exit(0);
+    }
+  });
+  let _check = setTimeout(() => {
+    console.log(`No valid JSON received yet...`);
+  }, 6000);
+  let _timer = setInterval(() => {
+    if (!fullData) return;
+    let data;
+    try {
+      data = JSON.parse(fullData);
+    } catch (e) {
+      return;
+    }
+    clearInterval(_timer);
+    clearTimeout(_check);
+    let store = thorin.lib('store'),
+      calls = [],
+      config = {};
+
+    calls.push(() => {
+      return store.getConfig(token).then((r) => {
+        config = r || {};
+      });
+    });
+
+    calls.push(() => {
+      let res = thorin.util.extend(config, data);
+      return store.setConfig(token, res);
+    });
+
+    thorin.series(calls, (e) => {
+      if (e) {
+        console.error(`Error: ${e.message}`);
+        return process.exit(1);
+      }
+      console.log(`JSON saved`);
+      process.exit(0);
+    });
+
+  }, 200);
+}
+
 function doClear(token, keyName) {
   let store = thorin.lib('store');
   let calls = [],
@@ -24,12 +75,22 @@ function doClear(token, keyName) {
   });
 
   calls.push(() => {
+    let isClear = false;
     if (!keyName) {
       result = {};
+      isClear = true;
     } else {
       dot.del(keyName, result);
     }
-    return store.setConfig(token, result);
+    if (!isClear) {
+      return store.setConfig(token, result);
+    }
+    return new Promise((resolve, reject) => {
+      console.log('WARNING: Clearing all config in 5 seconds...');
+      setTimeout(() => {
+        return store.setConfig(token, result).then(resolve).catch(reject);
+      }, 5000);
+    });
   });
 
   thorin.series(calls, (e) => {
@@ -126,8 +187,8 @@ thorin.run((err) => {
   let args = process.argv.splice(2),
     cmd = args[0];
   args = args.splice(1);
-  if (cmd !== 'get' && cmd !== 'set' && cmd !== 'clear' && cmd !== 'del') {
-    console.error(`Usage: node config {set|get|clear|del} {key} {value}`);
+  if (cmd !== 'get' && cmd !== 'set' && cmd !== 'clear' && cmd !== 'del' && cmd !== 'input') {
+    console.error(`Usage: node config {set|get|clear|del|input} {key} {value}`);
     return process.exit(1);
   }
   let keyName = args[0],
@@ -137,6 +198,11 @@ thorin.run((err) => {
     console.error(`Usage: node config set key {value}`);
     return process.exit(1);
   }
+  /* STDIN INPUT  */
+  if (cmd === 'input') {
+    return doInput(token);
+  }
+
   /* CLEAR config (key) */
   if (cmd === 'clear' || cmd === 'del') {
     return doClear(token, keyName);
