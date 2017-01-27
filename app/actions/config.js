@@ -30,9 +30,9 @@ dispatcher
   .use((intentObj, next) => {
     const regToken = intentObj.data('token'),
       store = thorin.lib('store');
-
     store.getConfig(regToken).then((data) => {
-      intentObj.result(data);
+      intentObj.rawResult(JSON.stringify(data || {}));
+      intentObj.resultHeaders('content-type', 'application/json');
       next();
     }).catch((e) => {
       next(e)
