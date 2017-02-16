@@ -49,6 +49,12 @@ function doInput(token) {
     });
 
     calls.push(() => {
+      Object.keys(data).forEach((keyName) => {
+        let keyValue = data[keyName];
+        delete data[keyName];
+        dot.del(keyName, data);
+        dot.set(keyName, keyValue, data);
+      });
       let res = thorin.util.extend(config, data);
       return store.setConfig(token, res);
     });
