@@ -98,7 +98,8 @@ dispatcher
     }).error('PORT.MISSING', 'Missing microservice port', 400),
     path: dispatcher.validate('STRING').default(''), // the default host path
     tags: dispatcher.validate('ARRAY', {type: 'string'}).default([]),
-    ttl: dispatcher.validate('NUMBER', {min: 1, max: 120}).default(30)  // default TTL of the service before we remove it, in seconds
+    ttl: dispatcher.validate('NUMBER', {min: 1, max: 120}).default(30),  // default TTL of the service before we remove it, in seconds
+    version: dispatcher.validate('NUMBER', {min: 0}).default(null)
   })
   .use((intentObj, next) => {
     const serviceData = intentObj.input(),
@@ -118,6 +119,7 @@ dispatcher
         // override any data
         item.tags = serviceData.tags;
         item.ttl = serviceData.ttl;
+        if (typeof serviceData.version === 'number') item.version = serviceData.version;
         if (serviceData.name) item.name = serviceData.name;
         if (serviceData.type !== item.type) item.type = serviceData.type;
         // update the remove_at ts.
@@ -148,10 +150,25 @@ dispatcher
     thorin.series(calls, (err) => {
       if (err) return next(err);
       let resultData = [];
+      /*
+       * We now have to check for the version number. If it is specified, any older versions of the same
+       * app type will be removed, so that traffic will not be directed to it anymore.
+       * */
+      let maxMap = {};  // a map of {serviceType:versionNumber}
+      for (let i = 0, len = registryData.length; i < len; i++) {
+        let item = registryData[i];
+        if (typeof item.version !== 'number') continue;
+        if (typeof maxMap[item.type] === 'undefined' || maxMap[item.type] < item.version) {
+          maxMap[item.type] = item.version;
+        }
+      }
       // finally, we will return the entire registry.
       for (let i = 0, len = registryData.length; i < len; i++) {
         let item = registryData[i];
         if (item.env !== intentObj.data('registry_env')) continue;
+        if (typeof maxMap[item.type] !== 'undefined') {
+          if (typeof item.version === 'undefined' || item.version < maxMap[item.type]) continue;
+        }
         delete item.env;
         delete item.id;
         delete item.remove_at;

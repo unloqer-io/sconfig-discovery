@@ -41,6 +41,7 @@
  - **path**  `String, default `
  - **tags**  `Array, default []`
  - **ttl**  `Number, default 30`
+ - **version**  `Number, default null`
 
 ##### Authorization 
  - registry.token
