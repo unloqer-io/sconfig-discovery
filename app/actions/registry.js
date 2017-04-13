@@ -73,7 +73,7 @@ dispatcher
     for (let i = 0, len = resultData.length; i < len; i++) {
       let item = resultData[i];
       if (typeof item.version === 'undefined') {
-        fullData.push(item.version);
+        fullData.push(item);
         continue;
       }
       if (typeof maxMap[item.type] !== 'undefined') {
