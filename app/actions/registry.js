@@ -157,7 +157,10 @@ dispatcher
       let maxMap = {};  // a map of {serviceType:versionNumber}
       for (let i = 0, len = registryData.length; i < len; i++) {
         let item = registryData[i];
-        if (typeof item.version !== 'number') continue;
+        if (typeof item.version !== 'number') {
+          if (typeof item.version !== 'undefined') delete item.version;
+          continue;
+        }
         if (typeof maxMap[item.type] === 'undefined' || maxMap[item.type] < item.version) {
           maxMap[item.type] = item.version;
         }
