@@ -129,6 +129,7 @@ dispatcher
       serviceId = serviceData.host + ':' + serviceData.port,
       registryData = intentObj.data('registry'),
       storeObj = thorin.lib('store');
+    if (serviceData.version == null) delete serviceData.version;
     serviceData.env = intentObj.data('registry_env');
     if (serviceData.timeout == null) delete serviceData.timeout;
     let wasFound = false, sid;
