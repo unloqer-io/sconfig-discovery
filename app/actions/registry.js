@@ -63,7 +63,6 @@ dispatcher
         }
       }
       delete item.id;
-      delete item.remove_at;
       delete item.env;
       resultData.push(item);
     }
@@ -197,7 +196,6 @@ dispatcher
         }
         delete item.env;
         delete item.id;
-        delete item.remove_at;
         resultData.push(item);
       }
       intentObj.result(resultData);
