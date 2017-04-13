@@ -30,16 +30,17 @@ dispatcher
     const registry = intentObj.data('registry'),
       storeObj = thorin.lib('store'),
       accessToken = intentObj.data('token'),
-      resultData = [],
       regEnv = intentObj.data('registry_env'),
       filterType = intentObj.input('type'),
       filterTags = intentObj.input('tags'),
       filterTagMap = {};
+    let resultData = [];
     if (filterTags) {
       for (let j = 0; j < filterTags.length; j++) {
         filterTagMap[filterTags[j]] = true;
       }
     }
+    let maxMap = {};  // a map of {serviceType:versionNumber}
     for (let i = 0, len = registry.length; i < len; i++) {
       let item = registry[i];
       if (filterType && item.type !== filterType) continue;
@@ -54,11 +55,33 @@ dispatcher
         if (!isTagFound) continue;
       }
       if (item.env !== regEnv) continue;
+      if (typeof item.version !== 'number') {
+        if (typeof item.version !== 'undefined') delete item.version;
+      } else {
+        if (typeof maxMap[item.type] === 'undefined' || maxMap[item.type] < item.version) {
+          maxMap[item.type] = item.version;
+        }
+      }
       delete item.id;
       delete item.remove_at;
       delete item.env;
       resultData.push(item);
     }
+
+    // finally, we check the version of each one, if available.
+    let fullData = [];
+    for (let i = 0, len = resultData.length; i < len; i++) {
+      let item = resultData[i];
+      if (typeof item.version === 'undefined') {
+        fullData.push(item.version);
+        continue;
+      }
+      if (typeof maxMap[item.type] !== 'undefined') {
+        if (item.version < maxMap[item.type]) continue;
+      }
+      fullData.push(item);
+    }
+    resultData = fullData;
     let calls = [];
 
     calls.push(() => {
