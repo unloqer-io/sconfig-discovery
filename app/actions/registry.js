@@ -90,12 +90,6 @@ dispatcher
     });
     thorin.series(calls, (e) => {
       if (e) return next(e);
-      // clean data
-      for (let i = 0, len = resultData.length; i < len; i++) {
-        let item = resultData[i];
-        if (item.id) delete item.id;
-        if (item.env) delete item.env;
-      }
       intentObj.result(resultData);
       intentObj.send();
       reqCount++;
@@ -205,12 +199,6 @@ dispatcher
           if (typeof item.version === 'undefined' || item.version < maxMap[item.type]) continue;
         }
         resultData.push(item);
-      }
-      // clean data
-      for (let i = 0, len = resultData.length; i < len; i++) {
-        let item = resultData[i];
-        if (item.id) delete item.id;
-        if (item.env) delete item.env;
       }
       intentObj.result(resultData);
       intentObj.setMeta({
