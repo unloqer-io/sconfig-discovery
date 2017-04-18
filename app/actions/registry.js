@@ -142,7 +142,11 @@ dispatcher
         // override any data
         item.tags = serviceData.tags;
         item.ttl = serviceData.ttl;
-        if (typeof serviceData.version === 'number') item.version = serviceData.version;
+        if (typeof serviceData.version === 'number') {
+          item.version = serviceData.version;
+        } else if (typeof item.version !== 'undefined') {
+          delete item.version;
+        }
         if (serviceData.name) item.name = serviceData.name;
         if (serviceData.type !== item.type) item.type = serviceData.type;
         // update the remove_at ts.
