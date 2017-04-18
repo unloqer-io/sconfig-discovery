@@ -128,6 +128,7 @@ dispatcher
       accessToken = intentObj.data('token'),
       serviceId = serviceData.host + ':' + serviceData.port,
       registryData = intentObj.data('registry'),
+      regEnv = intentObj.data('registry_env'),
       storeObj = thorin.lib('store');
     if (serviceData.version == null) delete serviceData.version;
     serviceData.env = intentObj.data('registry_env');
@@ -136,7 +137,7 @@ dispatcher
     // Step one, check if the registry already contains the new service host:port
     for (let i = 0, len = registryData.length; i < len; i++) {
       let item = registryData[i];
-      if (item.id === serviceId && item.env === intentObj.data('registry_env')) {
+      if (item.id === serviceId && item.env === regEnv) {
         wasFound = true;
         sid = item.sid;
         // override any data
@@ -156,27 +157,20 @@ dispatcher
     }
     // If we did not find it, we push it.
     if (!wasFound) {
+      serviceData.env = regEnv;
       serviceData.remove_at = Date.now() + serviceData.ttl * 1000;
       serviceData.id = serviceId; // this is the host:port id
       serviceData.sid = thorin.util.sha1(thorin.util.randomString(32) + serviceData.id); // this is the heartbeat id
       sid = serviceData.sid;
       registryData.push(serviceData);
     }
+
     let calls = [],
+      resultData = [],
       serviceKey;
-    // step one, update the registry
+
+    /* Filter out versioned */
     calls.push(() => {
-      return storeObj.saveRegistry(accessToken, registryData);
-    });
-    // next, fetch the service shared key.
-    calls.push(() => {
-      return storeObj.getServiceKey(accessToken).then((key) => {
-        serviceKey = key;
-      });
-    });
-    thorin.series(calls, (err) => {
-      if (err) return next(err);
-      let resultData = [];
       /*
        * We now have to check for the version number. If it is specified, any older versions of the same
        * app type will be removed, so that traffic will not be directed to it anymore.
@@ -195,13 +189,31 @@ dispatcher
       // finally, we will return the entire registry.
       for (let i = 0, len = registryData.length; i < len; i++) {
         let item = registryData[i];
-        if (item.env !== intentObj.data('registry_env')) continue;
+        if (item.env !== regEnv) continue;
         if (typeof maxMap[item.type] !== 'undefined') {
           if (typeof item.version === 'undefined' || item.version < maxMap[item.type]) continue;
         }
-        delete item.env;
-        delete item.id;
         resultData.push(item);
+      }
+    });
+    // step one, update the registry
+    calls.push(() => {
+      return storeObj.saveRegistry(accessToken, resultData);
+    });
+    // next, fetch the service shared key.
+    calls.push(() => {
+      return storeObj.getServiceKey(accessToken).then((key) => {
+        serviceKey = key;
+      });
+    });
+    thorin.series(calls, (err) => {
+      if (err) return next(err);
+      // clean items
+      for (let i = 0, len = resultData.length; i < len; i++) {
+        let item = resultData[i];
+        if (item.id) delete item.id;
+        if (item.env) delete item.env;
+        if (item.remove_at) delete item.remove_at;
       }
       intentObj.result(resultData);
       intentObj.setMeta({
