@@ -143,7 +143,7 @@ dispatcher
         item.ttl = serviceData.ttl;
         if (typeof serviceData.version === 'number') {
           item.version = serviceData.version;
-        } else if (typeof item.version !== 'undefined') {
+        } else {
           delete item.version;
         }
         if (serviceData.name) item.name = serviceData.name;
@@ -195,7 +195,7 @@ dispatcher
       for (let i = 0, len = registryData.length; i < len; i++) {
         let item = registryData[i];
         if (item.env !== regEnv) continue;
-        if (typeof maxMap[item.type] !== 'undefined') {
+        if (typeof maxMap[item.type] !== 'undefined' && typeof item.version === 'number') {
           if (typeof item.version === 'undefined' || item.version < maxMap[item.type]) continue;
         }
         resultData.push(item);
