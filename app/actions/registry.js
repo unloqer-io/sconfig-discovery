@@ -62,8 +62,6 @@ dispatcher
           maxMap[item.type] = item.version;
         }
       }
-      delete item.id;
-      delete item.env;
       resultData.push(item);
     }
 
@@ -92,6 +90,12 @@ dispatcher
     });
     thorin.series(calls, (e) => {
       if (e) return next(e);
+      // clean data
+      for (let i = 0, len = resultData.length; i < len; i++) {
+        let item = resultData[i];
+        if (item.id) delete item.id;
+        if (item.env) delete item.env;
+      }
       intentObj.result(resultData);
       intentObj.send();
       reqCount++;
@@ -126,6 +130,7 @@ dispatcher
   .use((intentObj, next) => {
     const serviceData = intentObj.input(),
       accessToken = intentObj.data('token'),
+      regEnv = intentObj.data('registry_env'),
       serviceId = serviceData.host + ':' + serviceData.port,
       registryData = intentObj.data('registry'),
       storeObj = thorin.lib('store');
@@ -136,7 +141,7 @@ dispatcher
     // Step one, check if the registry already contains the new service host:port
     for (let i = 0, len = registryData.length; i < len; i++) {
       let item = registryData[i];
-      if (item.id === serviceId && item.env === intentObj.data('registry_env')) {
+      if (item.id === serviceId && item.env === regEnv) {
         wasFound = true;
         sid = item.sid;
         // override any data
@@ -195,13 +200,17 @@ dispatcher
       // finally, we will return the entire registry.
       for (let i = 0, len = registryData.length; i < len; i++) {
         let item = registryData[i];
-        if (item.env !== intentObj.data('registry_env')) continue;
+        if (item.env !== regEnv) continue;
         if (typeof maxMap[item.type] !== 'undefined') {
           if (typeof item.version === 'undefined' || item.version < maxMap[item.type]) continue;
         }
-        delete item.env;
-        delete item.id;
         resultData.push(item);
+      }
+      // clean data
+      for (let i = 0, len = resultData.length; i < len; i++) {
+        let item = resultData[i];
+        if (item.id) delete item.id;
+        if (item.env) delete item.env;
       }
       intentObj.result(resultData);
       intentObj.setMeta({
