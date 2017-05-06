@@ -44,7 +44,7 @@ thorin.run((err) => {
   /* Start the UI if set */
   if (process.env.ADMIN_UI) {
     let admins = thorin.config('admin.emails');
-    if (!admins || admins.length) {
+    if (!admins || admins.length === 0) {
       log.warn(`UI skipped, no admins defined in ADMIN_EMAIL env variable`);
     } else {
       startUi();
