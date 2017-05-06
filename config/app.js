@@ -1,10 +1,14 @@
 'use strict';
+const API_PORT = process.env.PORT || 18000,
+  WEB_PORT = process.env.WEB_PORT || 18001;
 module.exports = {
   "admin.token": process.env.ADMIN_TOKEN,
+  "admin.emails": [],
   "transport.http": {
     actionPath: ['/dispatch', '/'],
-    port: process.env.PORT || 18000,
+    port: (global.THORIN_APP === 'web' ? WEB_PORT : API_PORT),
     payloadLimit: 500000,
+    static: global.THORIN_APP === 'web' ? thorin.root + '/public' : false,
     debug: false
   },
   "store.redis": {
@@ -13,8 +17,20 @@ module.exports = {
     "host": "localhost",
     "port": 6379
   },
-  "config.maxSize": 50000 // max number of chars for the config actions
+  "config.maxSize": 50000, // max number of chars for the config actions
+  /* UI-specific settings */
+  "plugin.render.path": "public/",
+  "plugin.session": {
+    cookieName: 'discui',
+    namespace: 't-session',
+    store: 'redis'
+  }
 };
+
+if (process.env.ADMIN_EMAIL) {
+  let mails = process.env.ADMIN_EMAIL.replace(/ /g, '').split(',');
+  module.exports['admin.emails'] = mails;
+}
 
 if (process.env.REDIS_HOST) {
   module.exports['store.redis'].host = process.env.REDIS_HOST;

@@ -1,0 +1,27 @@
+@import "./variables.less";
+@import "codemirror/main.less";
+@import "codemirror/theme.less";
+
+body {
+  height: 98vh;
+  margin: 0;
+}
+
+#app {
+  height: calc(~"100% - 70px");
+}
+.button {
+  margin-left: 4px;
+}
+.console-app {
+  padding: 24px;
+  height: 80%;
+  > div {
+    height: 100%;
+  }
+  .app-config {
+    width: 80%;
+    margin: 0 auto;
+    height: calc(~"100% - 48px");
+  }
+}

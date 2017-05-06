@@ -1,11 +1,13 @@
 node_modules
 docs
+ui
 config/.thorin
 config/*.sh
 *.log
 .gitlab-ci.yml
 README.md
 .editorconfig
+sessions/
 sql/
 .git
 .idea

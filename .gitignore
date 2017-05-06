@@ -7,4 +7,5 @@ Thumbs.db
 node_modules
 .thorin
 launch.json
+sessions/
 config/deploy.sh

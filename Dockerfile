@@ -12,6 +12,12 @@ ENV NODE_ENV production
 # If the admin token is set, the admin API endpoints will be exposed and available.
 #ENV ADMIN_TOKEN none
 
+# You can also set a list of admin e-mails that will have access to the UI (comma-delimited)
+#ENV ADMIN_EMAIL none
+
+# Set this to true to enable the admin UI
+#ENV ADMIN_UI none
+
 # If you want to host your config on sconfig.io, place the key/secret combo here.
 #ENV SCONFIG_KEY none
 #ENV SCONFIG_SECRET none

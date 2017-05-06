@@ -2,7 +2,8 @@
 /**
  * Created by Adrian on 12-Apr-16.
  */
-const thorin = require('thorin');
+const thorin = require('thorin'),
+  spawn = require('child_process').spawn;
 
 thorin
   .addTransport(require('thorin-transport-http'))
@@ -40,4 +41,42 @@ thorin.run((err) => {
     log.debug(e);
     process.exit(1);
   });
+  /* Start the UI if set */
+  if (process.env.ADMIN_UI) {
+    let admins = thorin.config('admin.emails');
+    if (!admins || admins.length) {
+      log.warn(`UI skipped, no admins defined in ADMIN_EMAIL env variable`);
+    } else {
+      startUi();
+    }
+  }
+  function startUi() {
+    let logger = thorin.logger('ui');
+    let uiObj = spawn('node', ['ui.js'], {
+      cwd: process.cwd(),
+      env: process.env
+    });
+    uiObj.stdout.on('data', (data) => {
+      let d = data.toString();
+      d = d.split('\n');
+      if (d[d.length - 1] === '') d.pop();
+      d = d.join('\n');
+      console.log(d);
+    });
+
+    uiObj.stderr.on('data', (data) => {
+      let d = data.toString();
+      d = d.split('\n');
+      if (d[d.length - 1] === '') d.pop();
+      d = d.join('\n');
+      console.log(d);
+    });
+
+    uiObj.on('close', (code) => {
+      logger.warn(`UI closed, re-launching...`);
+      setTimeout(() => {
+        startUi();
+      }, 1000);
+    });
+  }
 });
