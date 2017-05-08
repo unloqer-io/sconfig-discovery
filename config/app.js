@@ -41,6 +41,9 @@ if (process.env.REDIS_PORT) {
 if (process.env.REDIS_PASS || process.env.REDIS_PASSWORD) {
   module.exports['store.redis'].password = process.env.REDIS_PASS || process.env.REDIS_PASSWORD;
 }
+if (process.env.REDIS_CLUSTERED) {
+  module.exports['store.redis'].clustered = true;
+}
 
 if (process.env.SCONFIG_KEY) {
   thorin

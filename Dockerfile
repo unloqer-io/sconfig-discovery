@@ -30,6 +30,7 @@ ENV NODE_ENV production
 #ENV REDIS_HOST localhost
 #ENV REDIS_PORT 6379
 #ENV REDIS_PASSWORD none
+#ENV REDIS_CLUSTERED true // If set to true, we will set store.redis.clustered = true
 
 # --- Configure the app as the node user
 WORKDIR /$user/src/app
