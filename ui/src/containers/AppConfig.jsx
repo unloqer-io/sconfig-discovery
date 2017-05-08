@@ -27,7 +27,7 @@ class AppConfig extends React.Component {
 
   load() {
     const {config} = this.props;
-    api.fetch(configAct.read(config.token), (e, data) => {
+    api.fetch(configAct.read(config.token, config.version), (e, data) => {
       if (e) {
         return this.setState({
           error: e
@@ -52,7 +52,7 @@ class AppConfig extends React.Component {
       error: null
     });
 
-    api.fetch(configAct.save(data, config.token), (e, res) => {
+    api.fetch(configAct.save(data, config.token, config.version), (e, res) => {
       if (e) {
         return this.setState({
           error: e
@@ -107,6 +107,20 @@ class AppConfig extends React.Component {
     let data = JSON.stringify(config.data, null, 2);
     return (
       <div className="app-config">
+        <div style={{width: 250}}>
+          <label>Version</label>
+          <input
+            ref={(c) => this.version = c}
+            type="text"
+            name="version"
+            onBlur={() => {
+              tredux.dispatch(configAct.setVersion(this.version && this.version.value));
+              setTimeout(() => {
+                this.load();
+              }, 10);
+            }}
+          />
+        </div>
         <CodeEditor
           ref={(c) => this.editor = c}
           heightRatio={1.8}

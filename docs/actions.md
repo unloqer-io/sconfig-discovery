@@ -3,6 +3,9 @@
 ##### Aliases 
 > - GET /config
 
+##### Input 
+ - **version**  `String, default null`
+
 ##### Authorization 
  - registry.token
 
@@ -11,6 +14,9 @@
 ## config.set
 ##### Aliases 
 > - POST /config
+
+##### Input 
+ - **version**  `String, default null`
 
 ##### Authorization 
  - registry.token

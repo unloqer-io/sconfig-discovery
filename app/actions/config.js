@@ -11,11 +11,18 @@ dispatcher
   .template('registry')
   .debug(false)
   .alias('POST', '/config')
+  .input({
+    version: dispatcher.validate('STRING').default(null)
+  })
   .use((intentObj, next) => {
-    const data = intentObj.rawInput,
+    let data = intentObj.rawInput,
       regToken = intentObj.data('token'),
       store = thorin.lib('store');
 
+    if (data.version) {
+      regToken += '#' + data.version;
+      delete data.version;
+    }
     store.setConfig(regToken, data).then(() => next()).catch((e) => next(e));
   });
 
@@ -27,9 +34,16 @@ dispatcher
   .template('registry')
   .debug(false)
   .alias('GET', '/config')
+  .input({
+    version: dispatcher.validate('STRING').default(null)
+  })
   .use((intentObj, next) => {
-    const regToken = intentObj.data('token'),
+    let regToken = intentObj.data('token'),
+      input = intentObj.input(),
       store = thorin.lib('store');
+    if (input.version) {
+      regToken += '#' + input.version;
+    }
     store.getConfig(regToken).then((data) => {
       intentObj.rawResult(JSON.stringify(data || {}));
       intentObj.resultHeaders('content-type', 'application/json');

@@ -5,7 +5,8 @@ export const TYPE = {
   DATA: 'ui.config.data.set',
   READ: 'ui.config.read',
   SAVE: 'ui.config.save',
-  TOKEN: 'ui.config.token'
+  TOKEN: 'ui.config.token',
+  VERSION: 'ui.config.version'
 };
 tredux.addActions('config', module.exports);
 
@@ -14,6 +15,14 @@ export function setToken(token) {
     type: TYPE.TOKEN,
     payload: {
       token
+    }
+  };
+}
+export function setVersion(version) {
+  return {
+    type: TYPE.VERSION,
+    payload: {
+      version
     }
   };
 }
@@ -27,20 +36,22 @@ export function setData(data) {
   }
 }
 
-export function read(token) {
+export function read(token, version) {
   return {
     type: TYPE.READ,
     payload: {
+      version,
       token
     }
   }
 }
 
-export function save(data, token) {
+export function save(data, token, version) {
   return {
     type: TYPE.SAVE,
     payload: {
       token,
+      version,
       data
     }
   }

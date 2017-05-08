@@ -8,6 +8,7 @@ const tredux = require('tredux'),
 const reducer = tredux.reducer('config', {
   loaded: false,
   token: null,
+  version: null,
   data: null
 });
 reducer.handle(TYPE.DATA, (state, res) => {
@@ -19,4 +20,8 @@ reducer.handle(TYPE.DATA, (state, res) => {
 
 reducer.handle(TYPE.TOKEN, (state, payload) => {
   state.token = payload.token;
+});
+
+reducer.handle(TYPE.VERSION, (state, payload) => {
+  state.version = payload.version || null;
 });

@@ -13,7 +13,8 @@ dispatcher
   .addAction('ui.config.read')
   .authorize('ui.authenticated')
   .input({
-    token: dispatcher.validate('STRING').default(null)
+    token: dispatcher.validate('STRING').default(null),
+    version: dispatcher.validate('STRING').default(null)
   })
   .use((intentObj, next) => {
     let result = {
@@ -24,11 +25,15 @@ dispatcher
       store = thorin.lib('store'),
       calls = [];
     let configToken = input.token || DISCOVERY_KEY;
+    if (input.version) {
+      configToken += '#' + input.version;
+    }
     if (configToken) {
       calls.push(() => {
         return store.getConfig(configToken).then((data) => {
           result.data = data;
           result.token = configToken;
+          result.token = result.token.split('#')[0];
         });
       });
     }
@@ -48,6 +53,7 @@ dispatcher
   .authorize('ui.authenticated')
   .input({
     token: dispatcher.validate('STRING').default(null),
+    version: dispatcher.validate('STRING').default(null),
     data: dispatcher.validate('JSON').error('DATA.INVALID', 'Missing configuration JSON')
   })
   .use((intentObj, next) => {
@@ -57,7 +63,9 @@ dispatcher
       calls = [];
     let configToken = input.token || DISCOVERY_KEY;
     if (!configToken) return next(thorin.error('DATA.INVALID', 'Missing discovery token'));
-
+    if (input.version) {
+      configToken += '#' + input.version;
+    }
     /* update data */
     calls.push(() => {
       return store.setConfig(configToken, input.data);
