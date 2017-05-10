@@ -12,7 +12,7 @@ module.exports = {
     debug: false
   },
   "store.redis": {
-    "prefix": "t-discovery",
+    "prefix": process.env.REDIS_PREFIX || "t-discovery",
     "namespace": "disc",
     "host": "localhost",
     "port": 6379

@@ -4,7 +4,7 @@
 > - GET /config
 
 ##### Input 
- - **version**  `String, default null`
+ - **v**  `String, default null`
 
 ##### Authorization 
  - registry.token
@@ -16,7 +16,7 @@
 > - POST /config
 
 ##### Input 
- - **version**  `String, default null`
+ - **v**  `String, default null`
 
 ##### Authorization 
  - registry.token

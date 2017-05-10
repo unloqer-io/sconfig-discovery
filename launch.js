@@ -12,6 +12,7 @@ thorin
 if (thorin.env === 'development') {
   thorin.addPlugin(require('thorin-plugin-docs'));
 }
+
 thorin.loadPath('app/lib/');
 
 thorin.run((err) => {
