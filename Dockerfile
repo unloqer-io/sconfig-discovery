@@ -28,6 +28,7 @@ ENV NODE_ENV production
 
 # The redis connection information will be storedhere
 #ENV REDIS_HOST localhost
+#ENV REDIS_SENTINEL
 #ENV REDIS_PORT 6379
 #ENV REDIS_PASSWORD none
 #ENV REDIS_PREFIX none

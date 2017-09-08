@@ -44,6 +44,9 @@ if (process.env.REDIS_PASS || process.env.REDIS_PASSWORD) {
 if (process.env.REDIS_CLUSTERED) {
   module.exports['store.redis'].clustered = true;
 }
+if (process.env.REDIS_SENTINEL) {
+  module.exports['store.redis'].sentinel = process.env.REDIS_SENTINEL.split(',');
+}
 
 if (process.env.SCONFIG_KEY) {
   thorin
