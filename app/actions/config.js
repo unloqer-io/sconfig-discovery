@@ -21,8 +21,8 @@ dispatcher
 
     if (data.v) {
       regToken += '#' + data.v;
-      delete data.v;
     }
+    delete data.v;
     store.setConfig(regToken, data).then(() => next()).catch((e) => next(e));
   });
 
